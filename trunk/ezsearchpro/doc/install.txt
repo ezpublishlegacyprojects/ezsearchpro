@@ -1,0 +1,114 @@
+eZ Search Engine Pro extension 1.0 INSTALL
+
+
+What is the eZ Search Engine Pro extension?
+=======================================
+
+   eZ Search Engine Pro extension, is a eZ Publish 4.x search
+   extension that extends the standard eZ Publish search engin
+   with support for sorting search by ranking and decay support
+   for older objects.
+   Ranking is computed when objects are indexed, words that are
+   part of for instance object name pattern or ezkeyword datatype
+   gets a higher ranking then words in a normal text attribute.
+   Ranking is configurable and explained further in search.ini. 
+
+
+Requirements
+============
+
+The following requirements exists for using eZ Online Editor MCE extension:
+
+o  eZ Publish version:
+
+   Make sure you use eZ Publish version 4.0 or higher.
+
+o  PHP version:
+
+   as indicated in your eZ Publish version requirements
+
+o  Web Server:
+   
+   as indicated in your eZ Publish version requirements
+
+
+Getting eZ Publish
+==================
+
+    You can download a version of eZ Publish from ez.no, you will find the
+    various versions at:
+    http://ez.no/download/ez_publish
+    
+    NOTE: You will need eZ Publish 4.0 or higher.
+    
+    Information on the installation of eZ Publish can be found at:
+    http://ez.no/doc
+
+
+Installing eZ Search Engine Pro extension
+=========================================
+
+1. Download the ezsearchpro extension from projects.ez.no
+
+2. Copy the downloaded package into the 'extension' directory of your
+   eZ Publish installation.
+
+3. Unpack the files in the distribution so you get a 'ezsearchpro' folder.
+
+4. Enable the ezsearchpro extension in eZ Publish.
+
+   To enable ezsearchpro for all of your siteaccesses, log in to your eZ Publish
+   administration interface, click on the 'Setup' tab, and then click
+   'Extensions' on the left. You will see the list of available extensions.
+   Select the 'ezsearchpro' item and click the 'Apply changes' button.
+   Alternatively, you can also edit the file 'site.ini.append.php' located
+   in the 'settings/override' directory. Add the following line under
+   the [ExtensionSettings] section:
+
+   ActiveExtensions[]=ezsearchpro
+
+   Create the file and/or the section if they do not exist.
+
+   To enable ezsearchpro for only a single siteaccess, open the 'site.ini.append.php'
+   file located in the 'settings/siteaccess/your_siteaccess' directory.
+   Add the following line under the [ExtensionSettings] section:
+
+   ActiveAccessExtensions[]=ezsearchpro
+
+   Create the file and/or the section if they do not exist.
+
+6. Re-Index eZ Publish search index.
+
+   You need to re index eZ Publish search index to be able to take advantage
+   of the search ranking feature. You can either re publish all your objects
+   manually, or (preferably) you can run the following command line script (php-cli)
+   
+   1. open your command line window
+   2. navigate to the root folder of the eZ Publish installation
+   3. execute the update search index script, examples ('eng' is the name of the default siteaccess):
+      
+      On linux it is normally(on some servers you need to type the full path to php, ask the sys admin)
+      >php bin\php\updatesearchindex.php -s eng
+      
+      On windows with wamp installed you do like this
+      >c:\wamp\bin\php\php5.2.5\php.exe bin\php\updatesearchindex.php -s eng
+
+      Note: make sure you use the correct version of PHP, check version by typing:
+      >php -v
+      or on windows 
+      >c:\wamp\bin\php\php5.2.5\php.exe -v
+
+   4. repeat for every siteaccess that use a different database
+
+
+
+Troubleshooting
+===============
+
+1. Read the FAQ
+   ------------
+
+   Some problems are more common than others. The most common ones are listed
+   in the faq.txt file.
+
+
