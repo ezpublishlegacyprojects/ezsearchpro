@@ -33,12 +33,6 @@
 
 */
 
-//include_once( "lib/ezdb/classes/ezdb.php" );
-//include_once( "kernel/classes/ezcontentobject.php" );
-//include_once( "lib/ezlocale/classes/ezdatetime.php" );
-//include_once( "kernel/classes/ezcontentobject.php" );
-//include_once( 'kernel/classes/ezcontentlanguage.php' );
-
 class eZSearchEnginePro extends eZSearchEngine
 {
     /*!
@@ -246,7 +240,6 @@ class eZSearchEnginePro extends eZSearchEngine
         $totalWordCount = count( $indexArray );
 
         // Initialize transformation system
-        //include_once( 'lib/ezi18n/classes/ezchartransform.php' );
         $trans = eZCharTransform::instance();
 
         $prevWordID = 0;
@@ -704,7 +697,6 @@ class eZSearchEnginePro extends eZSearchEngine
         // Loop every word and insert result in temporary table
 
         // Determine whether we should search invisible nodes.
-        //include_once( 'kernel/classes/ezcontentobjecttreenode.php' );
         $showInvisibleNodesCond = eZContentObjectTreeNode::createShowInvisibleSQLString( !$ignoreVisibility );
         
         $stopWordThresholdValue = 100;
@@ -763,7 +755,8 @@ class eZSearchEnginePro extends eZSearchEngine
                                        ezcontentobject_tree.node_id = ezcontentobject_tree.main_node_id
                                        $showInvisibleNodesCond
                                        $sqlPermissionChecking[where]
-                                 GROUP BY ezsearch_object_word_link.contentobject_id, ezsearch_object_word_link.published" );
+                                 GROUP BY ezsearch_object_word_link.contentobject_id, ezsearch_object_word_link.published",
+                                 eZDBInterface::SERVER_SLAVE );
                 $i++;
             }
             else
@@ -797,7 +790,8 @@ class eZSearchEnginePro extends eZSearchEngine
                                       ezcontentobject_tree.node_id = ezcontentobject_tree.main_node_id
                                       $showInvisibleNodesCond
                                       $sqlPermissionChecking[where]
-                                      GROUP BY ezsearch_object_word_link.contentobject_id, ezsearch_object_word_link.published" );
+                                      GROUP BY ezsearch_object_word_link.contentobject_id, ezsearch_object_word_link.published",
+                                      eZDBInterface::SERVER_SLAVE );
              $this->TempTablesCount = 1;
              $i = $this->TempTablesCount;
         }
@@ -979,9 +973,9 @@ class eZSearchEnginePro extends eZSearchEngine
         if ( $nonExistingWordCount <= 0 )
         {
             // execute search query
-            $objectResArray = $db->arrayQuery( $searchQuery, array( 'limit' => $searchLimit, 'offset' => $searchOffset ) );
+            $objectResArray = $db->arrayQuery( $searchQuery, array( 'limit' => $searchLimit, 'offset' => $searchOffset ), eZDBInterface::SERVER_SLAVE );
             // execute search count query
-            $objectCountRes = $db->arrayQuery( $searchCountQuery );
+                $objectCountRes = $db->arrayQuery( $searchCountQuery, array(), eZDBInterface::SERVER_SLAVE );
             $objectRes = eZContentObjectTreeNode::makeObjectsArray( $objectResArray );
             $searchCount = $objectCountRes[0]['count'];
         }
@@ -995,8 +989,6 @@ class eZSearchEnginePro extends eZSearchEngine
         return array( 'SearchResult' => $objectRes,
                       'SearchCount' => $searchCount,
                       'StopWordArray' => $stopWordArray );
-
-        ini_set( 'OCI_COMMIT_ON_SUCCESS', 1 );
     }
 
     /*!
@@ -1059,7 +1051,6 @@ class eZSearchEnginePro extends eZSearchEngine
                         } break;
                         case 'class_name':
                         {
-                            //include_once( 'kernel/classes/ezcontentobjectname.php' );
                             $classNameFilter = eZContentClassName::sqlFilter();
                             $sortingFields .= $classNameFilter['nameField'];
                             $attributeFromSQL .= ", $classNameFilter[from]";
