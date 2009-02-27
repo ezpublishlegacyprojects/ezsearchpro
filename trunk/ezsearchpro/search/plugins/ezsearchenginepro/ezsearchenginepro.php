@@ -150,7 +150,7 @@ class eZSearchEnginePro extends eZSearchEngine
                     }
                                       
                     $wordFrequencyCount = 0;
-                    $wordArray = split( " ", $text );
+                    $wordArray = explode( ' ', $text );
                     $indexArrayStart = count( $indexArray );
 
                     foreach ( $wordArray as $word )
