@@ -1,9 +1,9 @@
 <?php
 //
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
-// SOFTWARE NAME: eZ Search Engin Pro
+// SOFTWARE NAME: eZ SearchEngine+
 // SOFTWARE RELEASE: 1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2008 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2009 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -28,7 +28,7 @@ class ezsearchproInfo
 {
     static function info()
     {
-        return array( 'Name'      => 'eZ Search Engine Pro for eZ Publish',
+        return array( 'Name'      => 'eZ SearchEngine+ for eZ Publish',
                       'Version'   => '1.0.1',
                       'Copyright' => 'Copyright © 1999 - 2008 eZ Systems AS',
                       'License'   => 'GNU General Public License v2.0'

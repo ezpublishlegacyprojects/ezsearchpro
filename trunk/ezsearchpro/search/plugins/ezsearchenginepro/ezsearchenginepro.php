@@ -5,9 +5,9 @@
 // Created on: <20-Jun-2007 00:00:00 ar>
 //
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
-// SOFTWARE NAME: eZ Publish
-// SOFTWARE RELEASE: 4.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2008 eZ Systems AS
+// SOFTWARE NAME: eZ SearchEngine+
+// SOFTWARE RELEASE: 1.x
+// COPYRIGHT NOTICE: Copyright (C) 1999-2009 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -35,26 +35,18 @@
 
 class eZSearchEnginePro extends eZSearchEngine
 {
-    /*!
+    /**
+     * Constructor, executes constructor on parent class
      */
     function eZSearchEnginePro()
     {
-        $generalFilter = array( 'subTreeTable' => '',
-                                'searchDateQuery' => '',
-                                'sectionQuery' => '',
-                                'classQuery' => '',
-                                'classAttributeQuery' => '',
-                                'searchPartText' => '',
-                                'subTreeSQL' => '',
-                                'sqlPermissionChecking' => array( 'from' => '',
-                                                                  'where' => '' ) );
-        $this->GeneralFilter = $generalFilter;
+        $this->eZSearchEngine();
     }
 
     /*!
      Adds an object to the search database.
     */
-    function addObject( $contentObject, $uri )
+    function addObject( $contentObject, $commit )
     {
         $searchIni = eZINI::instance( 'search.ini' );
         $attributeFactors = $searchIni->variable( 'Indexing', 'AttributeFactors' );
@@ -74,9 +66,8 @@ class eZSearchEnginePro extends eZSearchEngine
         if ( !$currentVersion )
         {
             $errCurrentVersion = $contentObject->attribute( 'current_version');
-            require_once( "lib/ezutils/classes/ezdebug.php" );
             eZDebug::writeError( "Failed to fetch \"current version\" ({$errCurrentVersion})" .
-                                 " of content object (ID: {$contentObjectID})", 'eZSearchEnginePro' );
+                                 " of content object (ID: {$contentObjectID})", __METHOD__ );
             return;
         }
         
@@ -137,7 +128,7 @@ class eZSearchEnginePro extends eZSearchEngine
 
                 foreach( $metaData as $metaDataPart )
                 {
-                    $text = eZSearchEnginePro::normalizeText( strip_tags(  $metaDataPart['text'] ), true );
+                    $text = self::normalizeText( strip_tags(  $metaDataPart['text'] ), true );
 
                     // Split text on whitespace
                     if ( is_numeric( trim( $text ) ) )
@@ -148,7 +139,7 @@ class eZSearchEnginePro extends eZSearchEngine
                     {
                         $integerValue = 0;
                     }
-                                      
+
                     $wordFrequencyCount = 0;
                     $wordArray = explode( ' ', $text );
                     $indexArrayStart = count( $indexArray );
@@ -239,6 +230,18 @@ class eZSearchEnginePro extends eZSearchEngine
         // Count the total words in index text
         $totalWordCount = count( $indexArray );
 
+        /* // Needs to be rewritten
+
+        // Count the number of instances of each word
+        $wordCountArray = array_count_values( $indexArray );
+
+        // Strip double words
+        $uniqueIndexArray = array_unique( $indexArray );
+
+        // Count unique words
+        $uniqueWordCount = count( $uniqueIndexArray );
+        */
+
         // Initialize transformation system
         $trans = eZCharTransform::instance();
 
@@ -263,6 +266,7 @@ class eZSearchEnginePro extends eZSearchEngine
             }
             else
                 $nextWordID = 0;
+//            print( "indexing word : $indexWord <br> " );
 
             $frequency = $indexArray[$i]['frequency'];
             $valuesStringList[] = " ( '$wordID', '$contentObjectID', '$frequency', '$placement', '$nextWordID', '$prevWordID', '$classID', '$contentClassAttributeID', '$published', '$sectionID', '$identifier', '$integerValue' ) ";
@@ -339,13 +343,18 @@ class eZSearchEnginePro extends eZSearchEngine
         }
 
         $allowSearch = true;
-        if ( trim( $searchText ) === '' )
+        if ( $searchText === '' || trim( $searchText ) === '' )
         {
-            $ini = eZINI::instance();
-            if ( $ini->variable( 'SearchSettings', 'AllowEmptySearch' ) != 'enabled' )
-                $allowSearch = false;
             if ( isset( $params['AllowEmptySearch'] ) )
+            {
                 $allowSearch = $params['AllowEmptySearch'];
+            }
+            else
+            {
+                $ini = eZINI::instance();
+                if ( $ini->variable( 'SearchSettings', 'AllowEmptySearch' ) != 'enabled' )
+                    $allowSearch = false;
+            }
         }
 
         if ( !$allowSearch )
@@ -507,8 +516,8 @@ class eZSearchEnginePro extends eZSearchEngine
         else if ( is_array( $searchContentClassID ) )
         {
             // Build query for searching in a number of classes
-            $classString = $db->implodeWithTypeCast( ', ', $searchContentClassID, 'int' );
-            $classQuery = "ezsearch_object_word_link.contentclass_id IN ( $classString ) AND ";
+            $classString = $db->generateSQLINStatement( $searchContentClassID, 'ezsearch_object_word_link.contentclass_id', false, false, 'int' );
+            $classQuery = "$classString AND ";
             $this->GeneralFilter['classAttributeQuery'] = $classQuery;
         }
 
