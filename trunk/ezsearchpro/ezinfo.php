@@ -29,8 +29,8 @@ class ezsearchproInfo
     static function info()
     {
         return array( 'Name'      => 'eZ SearchEngine+ for eZ Publish',
-                      'Version'   => '1.0.1',
-                      'Copyright' => 'Copyright © 1999 - 2008 eZ Systems AS',
+                      'Version'   => '1.0.2',
+                      'Copyright' => 'Copyright © 1999 - 2009 eZ Systems AS',
                       'License'   => 'GNU General Public License v2.0'
                     );
     }

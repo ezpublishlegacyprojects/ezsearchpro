@@ -1,4 +1,10 @@
 eZ Search Engine Pro extension Changelog
 
+1.0.2
+ - Sync with ezsearchengine in eZ Publish 4.2
+
+1.0.1
+ - Sync with ezsearchengine in eZ Publish 4.1 
+
 1.0
-* intial public version as extension for eZ Publish 4.x
+- intial public version as extension for eZ Publish 4.x

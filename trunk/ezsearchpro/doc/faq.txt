@@ -19,8 +19,8 @@ eZ Search Engine Pro extension  1.0 FAQ
 ===================================================================
 
     Make sure you are using correct version of php, you are most likly using a '
-    php 4.x version og php-cli.
-    Check by typing >php -v
+    php 4.x version or php-cli.
+    Check by typing "php -v"
     On linux, php 5 version of php-cli is often called php5, try with
     >php5 -v
 
@@ -30,7 +30,7 @@ eZ Search Engine Pro extension  1.0 FAQ
 
     Make sure your php-cli loads the mysql (or mysqli depending on what
     you use in eZ Publish ) module.
-    Check with >php -m
+    Check with "php -m"
 
  
 4. Can't reindex with command line script because of 'Fatal Error'
