@@ -128,7 +128,7 @@ class eZSearchEnginePro extends eZSearchEngine
 
                 foreach( $metaData as $metaDataPart )
                 {
-                    $text = self::normalizeText( strip_tags(  $metaDataPart['text'] ), true );
+                    $text = self::normalizeText( htmlspecialchars ($metaDataPart['text'], ENT_NOQUOTES, 'UTF-8' ) , true );
 
                     // Split text on whitespace
                     if ( is_numeric( trim( $text ) ) )
@@ -159,7 +159,7 @@ class eZSearchEnginePro extends eZSearchEngine
                                                    'frequency' => 0.0,
                                                    'is_url' => false,
                                                    'integer_value' => $integerValue );
-                            $indexArrayOnlyWords[] = $word;
+                            $indexArrayOnlyWords[$word] = 1;
                             $wordFrequencyCount++;
                             $wordCount++;
                             //if we have "www." before word than
@@ -173,7 +173,7 @@ class eZSearchEnginePro extends eZSearchEngine
                                                        'frequency' => 0.0,
                                                        'is_url' => true,
                                                        'integer_value' => $integerValue );
-                                $indexArrayOnlyWords[] = $additionalUrlWord;
+                                $indexArrayOnlyWords[$additionalUrlWord] = 1;
                                 $wordFrequencyCount++;
                                 $wordCount++;
                             }
@@ -197,9 +197,7 @@ class eZSearchEnginePro extends eZSearchEngine
         }
         eZContentObject::recursionProtectionEnd();
 
-        $indexArrayOnlyWords = array_unique( $indexArrayOnlyWords );
-
-        $wordIDArray = $this->buildWordIDArray( $indexArrayOnlyWords );
+        $wordIDArray = $this->buildWordIDArray( array_keys( $indexArrayOnlyWords ) );
 
         $db = eZDB::instance();
         $db->begin();
@@ -359,9 +357,9 @@ class eZSearchEnginePro extends eZSearchEngine
 
         if ( !$allowSearch )
         {
-            return array( 'SearchResult' => array(),
-                  'SearchCount' => 0,
-                  'StopWordArray' => array() );
+            return array( 'SearchResult'  => array(),
+                          'SearchCount'   => 0,
+                          'StopWordArray' => array() );
         }
 
         $searchText = $this->normalizeText( $searchText, false );
@@ -425,7 +423,7 @@ class eZSearchEnginePro extends eZSearchEngine
         $ignoreVisibility = isset( $params['IgnoreVisibility'] ) ? $params['IgnoreVisibility'] : false;
 
         // strip multiple spaces
-        $searchText = preg_replace( "(\s+)", ' ', $searchText );
+        $searchText = str_replace( "\s\s", ' ', $searchText );
 
         // find the phrases
         $phrasesResult = $this->getPhrases( $searchText );
@@ -549,7 +547,7 @@ class eZSearchEnginePro extends eZSearchEngine
             $searchPartsArray = $this->buildSearchPartArray( $phraseTextArray, $nonPhraseText, $wordIDHash, $wildIDArray );
         }
 
-        /* OR search, not used in this version
+        /// OR search, not used in this version
         $doOrSearch = false;
 
         if ( $doOrSearch == true )
@@ -582,11 +580,11 @@ class eZSearchEnginePro extends eZSearchEngine
                 }
                 $fullTextSQL = " ( $fullTextSQL ) AND ";
             }
-        }*/
+        }
 
         // Search only in specific sub trees
-        $subTreeSQL = '';
-        $subTreeTable = '';
+        $subTreeSQL = "";
+        $subTreeTable = "";
         if ( count( $subTreeArray ) > 0 )
         {
             // Fetch path_string value to use when searching subtrees
@@ -597,11 +595,11 @@ class eZSearchEnginePro extends eZSearchEngine
             {
                 if ( is_numeric( $nodeID ) and ( $nodeID > 0 ) )
                 {
-                    $subTreeNodeSQL .= ' ' . $nodeID;
+                    $subTreeNodeSQL .= " $nodeID";
 
                     if ( isset( $subTreeArray[$i + 1] ) and
                          is_numeric( $subTreeArray[$i + 1] ) )
-                        $subTreeNodeSQL .= ', ';
+                        $subTreeNodeSQL .= ", ";
 
                     $doSubTreeSearch = true;
                 }
@@ -611,11 +609,11 @@ class eZSearchEnginePro extends eZSearchEngine
             if ( $doSubTreeSearch == true )
             {
 
-                $subTreeNodeSQL = '( ' . $subTreeNodeSQL;
+                $subTreeNodeSQL = "( " . $subTreeNodeSQL;
                 //$subTreeTable = ", ezcontentobject_tree ";
                 $subTreeTable = '';
-                $subTreeNodeSQL .= ' ) ';
-                $nodeQuery = 'SELECT node_id, path_string FROM ezcontentobject_tree WHERE node_id IN ' . $subTreeNodeSQL;
+                $subTreeNodeSQL .= " ) ";
+                $nodeQuery = "SELECT node_id, path_string FROM ezcontentobject_tree WHERE node_id IN $subTreeNodeSQL";
 
                 // Build SQL subtre search query
                 $subTreeSQL = " ( ";
@@ -629,10 +627,10 @@ class eZSearchEnginePro extends eZSearchEngine
                     $subTreeSQL .= " ezcontentobject_tree.path_string like '$pathString%' ";
 
                     if ( $i < ( count( $nodeArray ) -1 ) )
-                        $subTreeSQL .= ' OR ';
+                        $subTreeSQL .= " OR ";
                     $i++;
                 }
-                $subTreeSQL .= ' ) AND ';
+                $subTreeSQL .= " ) AND ";
                 $this->GeneralFilter['subTreeTable'] = $subTreeTable;
                 $this->GeneralFilter['subTreeSQL'] = $subTreeSQL;
 
@@ -664,7 +662,7 @@ class eZSearchEnginePro extends eZSearchEngine
         // build fulltext search SQL part
         $searchWordArray = $this->splitString( $fullText );
         $searchWordCount = count( $searchWordArray );
-        $fullTextSQL = '';
+        $fullTextSQL = "";
         $stopWordArray = array( );
         $ini = eZINI::instance();
 
@@ -679,9 +677,9 @@ class eZSearchEnginePro extends eZSearchEngine
                 // cleanup temp tables
                 $db->dropTempTableList( $sqlPermissionChecking['temp_tables'] );
 
-                return array( 'SearchResult' => array(),
-                              'SearchCount' => 0,
-                              'StopWordArray' => array() );
+                return array( "SearchResult"  => array(),
+                              "SearchCount"   => 0,
+                              "StopWordArray" => array() );
             }
         }
 
@@ -696,9 +694,9 @@ class eZSearchEnginePro extends eZSearchEngine
             // cleanup temp tables
             $db->dropTempTableList( $sqlPermissionChecking['temp_tables'] );
 
-            return array( 'SearchResult' => array(),
-                          'SearchCount' => 0,
-                          'StopWordArray' => array() );
+            return array( "SearchResult"  => array(),
+                          "SearchCount"   => 0,
+                          "StopWordArray" => array() );
         }
 
         $i = $this->TempTablesCount;
@@ -724,7 +722,6 @@ class eZSearchEnginePro extends eZSearchEngine
 
         foreach ( $searchPartsArray as $searchPart )
         {
-
             // do not search words that are too frequent
             if ( $searchPart['object_count'] < $searchThresholdValue )
             {
@@ -816,12 +813,12 @@ class eZSearchEnginePro extends eZSearchEngine
             $db->dropTempTableList( $sqlPermissionChecking['temp_tables'] );
             $db->dropTempTableList( $this->getSavedTempTablesList() );
 
-            return array( 'SearchResult' => array(),
-                      'SearchCount' => 0,
-                      'StopWordArray' => $stopWordArray );
+            return array( "SearchResult"  => array(),
+                          "SearchCount"   => 0,
+                          "StopWordArray" => $stopWordArray );
         }
-        $tmpTablesFrom = '';
-        $tmpTablesWhere = '';
+        $tmpTablesFrom = "";
+        $tmpTablesWhere = "";
         /// tmp tables
         $tmpTableCount = $i;
         $relevanceSQL = ', ( (';
@@ -876,9 +873,9 @@ class eZSearchEnginePro extends eZSearchEngine
             $tmpTablesWhereExtra = "ezcontentobject.id=$tmpTable0.contentobject_id AND";
         }
 
-        $and = '';
+        $and = "";
         if ( $tmpTableCount > 1 )
-            $and = ' AND ';
+            $and = " AND ";
 
         // Generate ORDER BY SQL
         $orderBySQLArray = $this->buildSortSQL( $sortArray );
@@ -963,7 +960,7 @@ class eZSearchEnginePro extends eZSearchEngine
         if ( $nonExistingWordCount <= 0 )
         {
             // execute search query
-            $objectResArray = $db->arrayQuery( $searchQuery, array( 'limit' => $searchLimit, 'offset' => $searchOffset ), eZDBInterface::SERVER_SLAVE );
+            $objectResArray = $db->arrayQuery( $searchQuery, array( "limit" => $searchLimit, "offset" => $searchOffset ), eZDBInterface::SERVER_SLAVE );
             // execute search count query
                 $objectCountRes = $db->arrayQuery( $searchCountQuery, array(), eZDBInterface::SERVER_SLAVE );
             $objectRes = eZContentObjectTreeNode::makeObjectsArray( $objectResArray );
@@ -976,9 +973,9 @@ class eZSearchEnginePro extends eZSearchEngine
         $db->dropTempTableList( $sqlPermissionChecking['temp_tables'] );
         $db->dropTempTableList( $this->getSavedTempTablesList() );
 
-        return array( 'SearchResult' => $objectRes,
-                      'SearchCount' => $searchCount,
-                      'StopWordArray' => $stopWordArray );
+        return array( "SearchResult"  => $objectRes,
+                      "SearchCount"   => $searchCount,
+                      "StopWordArray" => $stopWordArray );
     }
 
     /*!
