@@ -37,5 +37,5 @@ eZ Search Engine Pro extension  1.0 FAQ
 ===================================================================
 
     Make sure your php-cli has it's memory_limit setting set to 64M or higher!
-      
+
 

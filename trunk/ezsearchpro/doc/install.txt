@@ -100,7 +100,17 @@ Installing eZ Search Engine Pro extension
 
    4. repeat for every siteaccess that use a different database
 
+7. (Optional) Change your template code to take advantage of ranking
 
+   If your using search from template operators you'll need to update sort_by
+   parameter to take advantage of relevance sorting, like this:
+
+   {set search=fetch( 'content', 'search',
+                    hash( 'text',    $search_text,
+                          'class_id', $search_class_array,
+                          'sort_by',  array( array('ranking',false()), array('published',false()) ),
+                          'offset',   $view_parameters.offset,
+                          'limit',    $page_limit))}
 
 Troubleshooting
 ===============
